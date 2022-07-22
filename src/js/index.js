@@ -31,51 +31,59 @@ const onSearchFormSubmit = async event => {
       event.target.elements.searchQuery.value = ' ';
       loadMoreBtn.classList.add('is-hidden');
       galleryEl.innerHTML = '';
-      Notiflix.Notify.failure('Sorry, there are no images matching your search query. Please try again.');
+      Notiflix.Notify.failure(
+        'Sorry, there are no images matching your search query. Please try again.'
+      );
 
       return;
     }
     Pixabay.totalHits = response.data.totalHits;
 
-    if (response.data.totalHits === 1) {
-      galleryEl.innerHTML = creatCards(response.data.hits);
-      loadMoreBtn.classList.remove('is-hidden');
-      return;
-    }
-    Notiflix.Notify.success(`Hooray! We found ${response.data.totalHits} images.`);
+    if (
+      response.data.totalHits <= Pixabay.per_page
+    ) {
+      loadMoreBtn.classList.add('is-hidden');
+    } 
+    Notiflix.Notify.success(
+      `Hooray! We found ${response.data.totalHits} images.`
+    );
     galleryEl.innerHTML = creatCards(response.data.hits);
     lightbox.refresh();
-
-    loadMoreBtn.classList.remove('is-hidden');
   } catch (error) {
     Notiflix.Notify.failure(console.log(error));
   }
 
   //   плавне прокручування
-//   const { height: cardHeight } = document
-//     .querySelector('.gallery')
-//     .firstElementChild.getBoundingClientRect();
+  //   const { height: cardHeight } = document
+  //     .querySelector('.gallery')
+  //     .firstElementChild.getBoundingClientRect();
 
-//   window.scrollBy({
-//     top: cardHeight * 2,
-//     behavior: 'smooth',
-//   });
+  //   window.scrollBy({
+  //     top: cardHeight * 2,
+  //     behavior: 'smooth',
+  //   });
 };
 
 const onLoadMoreBtnClick = async event => {
   if (!Pixabay.isNextDataExist()) {
     loadMoreBtn.classList.add('is-hidden');
-    Notiflix.Notify.failure("Were sorry, but you've reached the end of search results.");
+    Notiflix.Notify.failure(
+      "Were sorry, but you've reached the end of search results."
+    );
     return;
   }
   Pixabay.page += 1;
 
   try {
     const response = await Pixabay.fetchPhotosByQuery();
-
-    if (response.data.hits.length === 0) {
+    Pixabay.totalHits = response.data.totalHits;
+    if (Pixabay.totalHits < Pixabay.page * Pixabay.per_page) {
       loadMoreBtn.classList.add('is-hidden');
-      Notiflix.Notify.failure("Were sorry, but you've reached the end of search results.");
+      Notiflix.Notify.failure(
+        "Were sorry, but you've reached the end of search results."
+      );
+    } else {
+      loadMoreBtn.classList.remove('is-hidden');
     }
 
     galleryEl.insertAdjacentHTML('beforeend', creatCards(response.data.hits));
