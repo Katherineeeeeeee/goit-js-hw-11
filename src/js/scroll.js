@@ -20,6 +20,18 @@ const lightbox = new SimpleLightbox('.gallery div', {
 
 //SCROLL
 const scroll = async event => {
+
+
+console.log(Pixabay.isNextDataExist())
+
+
+if (!Pixabay.isNextDataExist()) {
+    observer.unobserve(document.querySelector('.target-element'));
+    Notiflix.Notify.failure("Were sorry, but you've reached the end of search results."
+    );
+    return;
+}
+
 Pixabay.page += 1;
 
 try {
@@ -50,7 +62,7 @@ window.scrollBy({
 const observer = new IntersectionObserver(
 (entries, observer) => {
     if (entries[0].isIntersecting) {
-      scroll();
+    scroll();
     }
 },
 {
@@ -65,9 +77,14 @@ const onSearchFormSubmit = async event => {
 
   Pixabay.query = event.currentTarget.elements.searchQuery.value;
   Pixabay.page = 1;
+  window.scrollTo({top: 0});
+
+
 
 try {
     const response = await Pixabay.fetchPhotosByQuery();
+
+    Pixabay.totalHits = response.data.totalHits;
 
     if (response.data.total === 0) {
     event.target.elements.searchQuery.value = ' ';
