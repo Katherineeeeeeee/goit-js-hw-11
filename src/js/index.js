@@ -43,7 +43,9 @@ const onSearchFormSubmit = async event => {
       response.data.totalHits <= Pixabay.per_page
     ) {
       loadMoreBtn.classList.add('is-hidden');
-    } 
+    } else {
+      loadMoreBtn.classList.remove('is-hidden');
+    }
     Notiflix.Notify.success(
       `Hooray! We found ${response.data.totalHits} images.`
     );
@@ -77,14 +79,6 @@ const onLoadMoreBtnClick = async event => {
   try {
     const response = await Pixabay.fetchPhotosByQuery();
     Pixabay.totalHits = response.data.totalHits;
-    if (Pixabay.totalHits < Pixabay.page * Pixabay.per_page) {
-      loadMoreBtn.classList.add('is-hidden');
-      Notiflix.Notify.failure(
-        "Were sorry, but you've reached the end of search results."
-      );
-    } else {
-      loadMoreBtn.classList.remove('is-hidden');
-    }
 
     galleryEl.insertAdjacentHTML('beforeend', creatCards(response.data.hits));
     lightbox.refresh();
